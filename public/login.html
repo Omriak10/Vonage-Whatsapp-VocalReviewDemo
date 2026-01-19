@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Vonage WhatsApp</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .login-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            width: 90%;
+            max-width: 450px;
+            padding: 40px;
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .logo h1 {
+            font-size: 28px;
+            color: #000;
+            margin-bottom: 5px;
+        }
+
+        .logo p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: inherit;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        textarea.form-control {
+            resize: vertical;
+            min-height: 100px;
+            font-family: monospace;
+        }
+
+        small {
+            display: block;
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .checkbox-group input {
+            margin-right: 8px;
+        }
+
+        .checkbox-group label {
+            font-size: 14px;
+            color: #333;
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 14px;
+            background: #000;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .btn-login:hover {
+            background: #333;
+        }
+
+        .error-message {
+            background: #fee;
+            color: #c33;
+            padding: 12px;
+            border-radius: 6px;
+            font-size: 14px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="logo">
+            <h1>Vonage WhatsApp</h1>
+            <p>Text Conversation Interface</p>
+        </div>
+
+        <div id="errorMessage" class="error-message"></div>
+
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="appId">Vonage Application ID</label>
+                <input 
+                    type="text" 
+                    id="appId" 
+                    class="form-control" 
+                    placeholder="Enter your Vonage Application ID"
+                    required
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="privateKey">Private Key</label>
+                <textarea 
+                    id="privateKey" 
+                    class="form-control" 
+                    placeholder="Paste your private key here (including -----BEGIN PRIVATE KEY----- and -----END PRIVATE KEY-----)"
+                    required
+                ></textarea>
+                <small>Your credentials are stored locally and never sent to our servers</small>
+            </div>
+
+            <div class="checkbox-group">
+                <input type="checkbox" id="rememberMe" checked>
+                <label for="rememberMe">Remember me on this device</label>
+            </div>
+
+            <button type="submit" class="btn-login">Login</button>
+        </form>
+    </div>
+
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const appId = document.getElementById('appId').value.trim();
+            const privateKey = document.getElementById('privateKey').value.trim();
+            const rememberMe = document.getElementById('rememberMe').checked;
+            
+            if (!appId || !privateKey) {
+                showError('Please fill in all fields');
+                return;
+            }
+            
+            // Basic validation of private key format
+            if (!privateKey.includes('BEGIN PRIVATE KEY')) {
+                showError('Invalid private key format. Make sure to include the full key with BEGIN and END markers.');
+                return;
+            }
+            
+            const credentials = {
+                appId: appId,
+                privateKey: privateKey
+            };
+            
+            // Store credentials
+            const storage = rememberMe ? localStorage : sessionStorage;
+            storage.setItem('vonageCredentials', JSON.stringify(credentials));
+            
+            // Redirect to main app
+            window.location.href = 'index.html';
+        });
+        
+        function showError(message) {
+            const errorEl = document.getElementById('errorMessage');
+            errorEl.textContent = message;
+            errorEl.classList.add('show');
+            
+            setTimeout(() => {
+                errorEl.classList.remove('show');
+            }, 5000);
+        }
+        
+        // Check if already logged in
+        if (localStorage.getItem('vonageCredentials') || sessionStorage.getItem('vonageCredentials')) {
+            window.location.href = 'index.html';
+        }
+    </script>
+</body>
+</html>
